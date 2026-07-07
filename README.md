@@ -178,7 +178,8 @@ GitFootScore is **inspired by [gitfut](https://github.com/younesfdj/gitfut)**
 (MIT), which pioneered the "GitHub profile as a FUT card" concept. The rating
 approach here is an independent implementation adapted from gitfut's engine, with
 its own data layer, card rendering (SVG card art via `next/og`), branding and UI.
-All credit for the original idea goes to the gitfut authors.
+All credit for the original idea goes to the gitfut authors. See
+[`NOTICE.md`](./NOTICE.md) for third-party credits.
 
 ---
 
