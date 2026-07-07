@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+/* GitFootScore — brand tokens. Midnight pitch, electric mint, violet.
+   Deliberately our own palette: no GitHub green, no trading-card gold spine. */
+:root {
+  --bg: #080b16;
+  --bg-2: #0c1122;
+  --surface: #121a30;
+  --surface-2: #182140;
+  --border: #253154;
+  --ink: #eef2ff;
+  --ink-soft: #aeb9d8;
+  --muted: #6f7ca3;
+  --mint: #29e5a8;
+  --violet: #7c7bff;
+  --coral: #ff6a5f;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-muted: var(--muted);
+  --color-mint: var(--mint);
+  --color-violet: var(--violet);
+  --color-coral: var(--coral);
+  --font-display: var(--font-display);
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(124, 123, 255, 0.14), transparent 60%),
+    radial-gradient(900px 500px at 100% 110%, rgba(41, 229, 168, 0.1), transparent 55%),
+    var(--bg);
+  min-height: 100dvh;
+}
+
+/* Pitch-line motif used behind the card + hero — our signature texture. */
+.pitch-lines {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 34px 34px;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-rise {
+  animation: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Card walkout — rises out of darkness, its tier glow igniting, then settles on
+   the clean hero shot. */
+@keyframes walkout {
+  0% {
+    opacity: 0;
+    transform: translateY(34px) scale(0.84);
+    filter: brightness(0.35) saturate(0.6);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(-4px) scale(1.015);
+    filter: brightness(1.18) saturate(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+.animate-walkout {
+  animation: walkout 0.95s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .animate-walkout {
+    animation: none;
+  }
+}
