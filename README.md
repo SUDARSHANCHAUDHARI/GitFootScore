@@ -7,9 +7,14 @@ player card: six attributes, an overall rating, a pitch position and a tier. The
 card is embeddable anywhere as a live-rendered image, so it re-scouts itself as
 the profile's stats change.
 
+Runs locally — start it with `pnpm dev` and the embed URL is:
+
 ```
-https://gitfootscore.app/<username>.png
+http://localhost:3000/<username>.png
 ```
+
+> There's no hosted instance; it's a run-it-yourself project. (Deploying? Set
+> `NEXT_PUBLIC_SITE_URL` and the URLs update automatically.)
 
 <p align="center">
   <img src="https://img.shields.io/badge/Next.js-16-black" alt="Next.js" />
@@ -141,7 +146,7 @@ REST tier, no cache).
 ### Embed in your README
 
 ```md
-[![My GitFootScore](https://gitfootscore.app/torvalds.png)](https://gitfootscore.app/u/torvalds)
+[![My GitFootScore](http://localhost:3000/torvalds.png)](http://localhost:3000/u/torvalds)
 ```
 
 ---
