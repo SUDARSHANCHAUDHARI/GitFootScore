@@ -32,7 +32,7 @@ export default function OG() {
           Turn your GitHub profile into a football-style player card.
         </div>
         <div style={{ display: "flex", fontSize: 26, color: "#6f7ca3", marginTop: 20 }}>
-          gitfootscore.app
+          ⚽ six attributes · one overall · one tier
         </div>
       </div>
     ),

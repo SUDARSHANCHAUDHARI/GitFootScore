@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { scout } from "@/lib/scout";
+import { SITE_HOST } from "@/lib/site";
 import { CARD_ART } from "@/components/theme";
 import { shieldSvg } from "@/lib/cardSvg";
 
@@ -105,7 +106,9 @@ export async function GET(_req: Request, { params }: { params: Promise<{ usernam
           <div style={{ display: "flex", fontSize: 40, fontWeight: 700, color: art.border }}>
             {r.overall} OVR · {r.position} · {r.tier}
           </div>
-          <div style={{ display: "flex", marginTop: 12, fontSize: 32 }}>gitfootscore.app/{profile.login}</div>
+          <div style={{ display: "flex", marginTop: 12, fontSize: 32 }}>
+            {SITE_HOST ? `${SITE_HOST}/${profile.login}` : `@${profile.login}`}
+          </div>
         </div>
       </div>
     ),
