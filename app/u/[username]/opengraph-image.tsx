@@ -63,7 +63,6 @@ export default async function OG({ params }: { params: Promise<{ username: strin
       >
         {/* mini card */}
         <div style={{ position: "relative", width: 330, height: 500, display: "flex" }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={shieldSvg(art)} alt="" width={330} height={500} />
           <div
             style={{
@@ -91,7 +90,6 @@ export default async function OG({ params }: { params: Promise<{ username: strin
               border: `3px solid ${art.border}`,
             }}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={profile.avatarUrl}
               alt=""

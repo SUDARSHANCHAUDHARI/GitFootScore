@@ -10,6 +10,9 @@ import { useEffect, useState } from "react";
 export function CardActions({ login, overall, tier }: { login: string; overall: number; tier: string }) {
   const [copied, setCopied] = useState<string | null>(null);
   const [origin, setOrigin] = useState("");
+  // Resolve origin after mount so SSR and first client render match (no
+  // hydration mismatch); window isn't available during SSR.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setOrigin(window.location.origin), []);
 
   const pageUrl = `${origin}/u/${login}`;

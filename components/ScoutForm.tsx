@@ -19,7 +19,6 @@ export function ScoutForm({ autoFocus = false }: { autoFocus?: boolean }) {
   return (
     <form onSubmit={submit} className="flex w-full max-w-md flex-col gap-3 sm:flex-row">
       <input
-        // eslint-disable-next-line jsx-a11y/no-autofocus
         autoFocus={autoFocus}
         value={value}
         onChange={(e) => setValue(e.target.value)}
