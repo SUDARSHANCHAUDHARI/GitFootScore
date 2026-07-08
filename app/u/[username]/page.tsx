@@ -44,37 +44,41 @@ function ErrorState({ username, message }: { username: string; message: string }
 export default async function CardPage({ params }: { params: Promise<Params> }) {
   const { username } = await params;
 
-  let content: React.ReactNode;
+  // Only the throwing scout() call lives in try/catch — JSX is built afterwards,
+  // outside it (rendering errors belong to an error boundary, not this catch).
+  let result: Awaited<ReturnType<typeof scout>> | null = null;
+  let message: string | null = null;
   try {
-    const { profile, rating, report } = await scout(username);
-    content = (
-      <div className="animate-rise flex flex-col items-center gap-7">
-        <Confetti active={rating.overall >= 82} />
-        <div className="animate-walkout" style={{ width: "clamp(288px, min(92vw, 58vh), 432px)" }}>
-          <PlayerCard profile={profile} rating={rating} />
-        </div>
-        <CardActions login={profile.login} overall={rating.overall} tier={rating.tier} />
-        {profile.bio && (
-          <p className="max-w-sm text-center text-[13.5px] leading-relaxed text-ink-soft">
-            {profile.bio}
-          </p>
-        )}
-        <ScoutReport report={report} tier={rating.tier} depth={rating.depth} />
-        <a
-          href={`https://github.com/${profile.login}`}
-          target="_blank"
-          rel="noopener"
-          className="text-[13px] text-muted underline-offset-2 hover:text-ink-soft hover:underline"
-        >
-          View @{profile.login} on GitHub ↗
-        </a>
-      </div>
-    );
+    result = await scout(username);
   } catch (e) {
-    const message =
-      e instanceof ScoutError ? e.message : "Something went wrong scouting this profile.";
-    content = <ErrorState username={username} message={message} />;
+    message = e instanceof ScoutError ? e.message : "Something went wrong scouting this profile.";
   }
+
+  const content = result ? (
+    <div className="animate-rise flex flex-col items-center gap-7">
+      <Confetti active={result.rating.overall >= 82} />
+      <div className="animate-walkout" style={{ width: "clamp(288px, min(92vw, 58vh), 432px)" }}>
+        <PlayerCard profile={result.profile} rating={result.rating} />
+      </div>
+      <CardActions login={result.profile.login} overall={result.rating.overall} tier={result.rating.tier} />
+      {result.profile.bio && (
+        <p className="max-w-sm text-center text-[13.5px] leading-relaxed text-ink-soft">
+          {result.profile.bio}
+        </p>
+      )}
+      <ScoutReport report={result.report} tier={result.rating.tier} depth={result.rating.depth} />
+      <a
+        href={`https://github.com/${result.profile.login}`}
+        target="_blank"
+        rel="noopener"
+        className="text-[13px] text-muted underline-offset-2 hover:text-ink-soft hover:underline"
+      >
+        View @{result.profile.login} on GitHub ↗
+      </a>
+    </div>
+  ) : (
+    <ErrorState username={username} message={message ?? "Something went wrong."} />
+  );
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-3xl flex-col px-6 pb-16 pt-8">

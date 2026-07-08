@@ -7,7 +7,6 @@ import Redis from "ioredis";
 // via globalThis so dev hot-reloads don't leak connections.
 
 declare global {
-  // eslint-disable-next-line no-var
   var __gfsRedis: Redis | null | undefined;
 }
 
