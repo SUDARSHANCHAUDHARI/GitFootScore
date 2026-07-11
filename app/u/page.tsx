@@ -12,7 +12,7 @@ import { CardActions } from "@/components/CardActions";
 import { Confetti } from "@/components/Confetti";
 import { Wordmark } from "@/components/Wordmark";
 import TokenSettings from "@/components/TokenSettings";
-import { ghHeaders } from "@/lib/ghToken";
+import { ghHeaders, getGhToken } from "@/lib/ghToken";
 
 type ScoutData = { profile: Profile; rating: Rating; report: Report };
 
@@ -32,6 +32,31 @@ function ErrorState({ username, message }: { username: string; message: string }
   );
 }
 
+// Anonymous GitHub requests share a low rate limit across all visitors. When
+// that's the failure and no token is set, guide the user to add their own
+// (free, public-read) — which also unlocks the accurate score.
+function RateLimitPrompt({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="flex max-w-sm flex-col items-center gap-4 text-center">
+      <div className="text-5xl">⏳</div>
+      <h1 className="text-2xl font-bold">GitHub is rate-limiting us</h1>
+      <p className="text-ink-soft">
+        Anonymous GitHub requests are shared and throttle quickly. Add your own GitHub token — it&apos;s free, needs no scopes, and gives you the accurate score with your own generous limit. It stays in your browser.
+      </p>
+      <TokenSettings />
+      <button
+        onClick={onRetry}
+        className="rounded-xl bg-mint px-5 py-2.5 text-[14px] font-bold text-[#04160e] hover:brightness-110"
+      >
+        Retry
+      </button>
+      <Link href="/" className="text-[13px] text-muted underline-offset-2 hover:text-ink-soft hover:underline">
+        or scout someone else
+      </Link>
+    </div>
+  );
+}
+
 function Loading({ username }: { username: string }) {
   return (
     <div className="flex flex-col items-center gap-4 text-center">
@@ -46,7 +71,9 @@ function CardView() {
   const username = params.get("username") ?? "";
   const [data, setData] = useState<ScoutData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [errorKind, setErrorKind] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [retry, setRetry] = useState(0);
 
   useEffect(() => {
     if (!username) {
@@ -57,29 +84,29 @@ function CardView() {
     let cancelled = false;
     setLoading(true);
     setError(null);
+    setErrorKind(null);
     setData(null);
     fetch(`/api/card/${encodeURIComponent(username)}`, { headers: ghHeaders() })
       .then(async (res) => {
-        const body = (await res.json()) as ScoutData & { error?: string };
-        if (!res.ok) throw new Error(body.error || "Something went wrong scouting this profile.");
-        return body;
-      })
-      .then((body) => {
-        if (!cancelled) {
+        const body = (await res.json()) as ScoutData & { error?: string; kind?: string };
+        if (cancelled) return;
+        if (!res.ok) {
+          setError(body.error || "Something went wrong scouting this profile.");
+          setErrorKind(body.kind ?? null);
+        } else {
           setData(body);
-          setLoading(false);
         }
       })
-      .catch((e) => {
-        if (!cancelled) {
-          setError((e as Error).message);
-          setLoading(false);
-        }
+      .catch(() => {
+        if (!cancelled) setError("Something went wrong scouting this profile.");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
       });
     return () => {
       cancelled = true;
     };
-  }, [username]);
+  }, [username, retry]);
 
   const content = loading ? (
     <Loading username={username} />
@@ -105,6 +132,8 @@ function CardView() {
         View @{data.profile.login} on GitHub ↗
       </a>
     </div>
+  ) : errorKind === "ratelimit" && !getGhToken() ? (
+    <RateLimitPrompt onRetry={() => setRetry((n) => n + 1)} />
   ) : (
     <ErrorState username={username} message={error ?? "Something went wrong."} />
   );
