@@ -11,6 +11,8 @@ import { ScoutReport } from "@/components/ScoutReport";
 import { CardActions } from "@/components/CardActions";
 import { Confetti } from "@/components/Confetti";
 import { Wordmark } from "@/components/Wordmark";
+import TokenSettings from "@/components/TokenSettings";
+import { ghHeaders } from "@/lib/ghToken";
 
 type ScoutData = { profile: Profile; rating: Rating; report: Report };
 
@@ -56,7 +58,7 @@ function CardView() {
     setLoading(true);
     setError(null);
     setData(null);
-    fetch(`/api/card/${encodeURIComponent(username)}`)
+    fetch(`/api/card/${encodeURIComponent(username)}`, { headers: ghHeaders() })
       .then(async (res) => {
         const body = (await res.json()) as ScoutData & { error?: string };
         if (!res.ok) throw new Error(body.error || "Something went wrong scouting this profile.");
@@ -113,9 +115,12 @@ function CardView() {
         <Link href="/">
           <Wordmark size={28} />
         </Link>
-        <Link href="/" className="text-[13px] font-medium text-ink-soft hover:text-ink">
-          ← Scout another
-        </Link>
+        <div className="flex items-center gap-3">
+          <TokenSettings />
+          <Link href="/" className="text-[13px] font-medium text-ink-soft hover:text-ink">
+            ← Scout another
+          </Link>
+        </div>
       </header>
       <div className="flex flex-1 items-center justify-center">{content}</div>
     </main>

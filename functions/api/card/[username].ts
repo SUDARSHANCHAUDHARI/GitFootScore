@@ -12,11 +12,16 @@ function json(body: unknown, status = 200): Response {
 }
 
 export const onRequestGet = async (context: {
+  request: Request;
   params: { username: string };
 }): Promise<Response> => {
   const { username } = context.params;
+  // Optional per-user GitHub token (bring-your-own): unlocks the accurate,
+  // GraphQL-based "rich" score and avoids the shared anonymous rate limit.
+  // Stored only in the visitor's browser, never on the server.
+  const userToken = context.request.headers.get("x-github-token") || undefined;
   try {
-    const { profile, rating, report } = await scout(username);
+    const { profile, rating, report } = await scout(username, userToken);
     return json({ profile, rating, report });
   } catch (e) {
     if (e instanceof ScoutError) {

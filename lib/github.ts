@@ -61,8 +61,8 @@ function restHeaders(tok: string | null): HeadersInit {
 
 // REST GET with the login's pooled token; one failover retry to a different
 // token if the first is rate-limited (see githubTokens).
-async function rest<T>(path: string, login: string): Promise<T> {
-  const primary = pickToken(login);
+async function rest<T>(path: string, login: string, userToken?: string | null): Promise<T> {
+  const primary = userToken ?? pickToken(login);
   const attempt = async (tok: string | null) =>
     fetch(`https://api.github.com${path}`, {
       headers: restHeaders(tok),
@@ -104,8 +104,8 @@ const YEAR_MS = 365 * 864e5;
 
 // One query with an aliased contributionsCollection window per year (recent →
 // oldest, capped), so recent activity + a lifetime total come back together.
-async function fetchRich(login: string, ageYears: number): Promise<RichSignals | undefined> {
-  const t = pickToken(login);
+async function fetchRich(login: string, ageYears: number, userToken?: string | null): Promise<RichSignals | undefined> {
+  const t = userToken ?? pickToken(login);
   if (!t) return undefined;
 
   const windows = Math.min(Math.max(Math.ceil(ageYears), 1), 8);
@@ -169,12 +169,13 @@ async function fetchRich(login: string, ageYears: number): Promise<RichSignals |
 
 // --- Public entry ----------------------------------------------------------
 
-export async function fetchProfile(username: string): Promise<Profile> {
+export async function fetchProfile(username: string, userToken?: string | null): Promise<Profile> {
   const login = username.trim().replace(/^@/, "");
-  const user = await rest<GhUser>(`/users/${encodeURIComponent(login)}`, login);
+  const user = await rest<GhUser>(`/users/${encodeURIComponent(login)}`, login, userToken);
   const repos = await rest<GhRepo[]>(
     `/users/${encodeURIComponent(login)}/repos?per_page=100&sort=pushed`,
     login,
+    userToken,
   );
 
   const owned = repos.filter((r) => !r.fork);
@@ -204,7 +205,7 @@ export async function fetchProfile(username: string): Promise<Profile> {
   }
   const activeYears = Math.min(Math.max(years.size, 1), Math.ceil(accountAgeYears) || 1);
 
-  const rich = await fetchRich(user.login, accountAgeYears);
+  const rich = await fetchRich(user.login, accountAgeYears, userToken);
 
   const stats: GitHubStats = {
     followers: user.followers,
