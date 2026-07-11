@@ -56,23 +56,27 @@ const derive = (profile: Profile): Scout => {
 // fill window. Entries clear the moment the fetch settles (success or failure).
 const inflight = new Map<string, Promise<Profile>>();
 
-async function fetchFresh(username: string, login: string): Promise<Profile> {
-  const profile = await fetchProfile(username);
+async function fetchFresh(username: string, login: string, userToken?: string | null): Promise<Profile> {
+  const profile = await fetchProfile(username, userToken);
   await writeCache(login, profile);
   void recordScout();
   return profile;
 }
 
-export async function scout(username: string): Promise<Scout> {
+export async function scout(username: string, userToken?: string | null): Promise<Scout> {
   const login = normalize(username);
 
-  const cached = await readCache(login);
+  // A user-supplied token yields richer data — key it separately so token and
+  // tokenless requests for the same login don't share an in-flight result.
+  const key = userToken ? `${login}#t` : login;
+
+  const cached = userToken ? null : await readCache(login);
   if (cached) return derive(cached);
 
-  const existing = inflight.get(login);
+  const existing = inflight.get(key);
   if (existing) return derive(await existing);
 
-  const pending = fetchFresh(username, login).finally(() => inflight.delete(login));
-  inflight.set(login, pending);
+  const pending = fetchFresh(username, login, userToken).finally(() => inflight.delete(key));
+  inflight.set(key, pending);
   return derive(await pending);
 }
