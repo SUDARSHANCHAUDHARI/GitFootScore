@@ -3,18 +3,15 @@
 **Turn any GitHub profile into a football-style player card — rated out of 99.**
 
 GitFootScore scouts a developer's public GitHub activity and prints an EA-style
-player card: six attributes, an overall rating, a pitch position and a tier. The
-card is embeddable anywhere as a live-rendered image, so it re-scouts itself as
-the profile's stats change.
+player card: six attributes, an overall rating, a pitch position and a tier.
 
-Runs locally — start it with `pnpm dev` and the embed URL is:
+**Live at [gitfootscore.sudarshantechlabs.com](https://gitfootscore.sudarshantechlabs.com)** —
+enter a username, or open `/u?username=<login>` directly.
 
-```
-http://localhost:3000/<username>.png
-```
-
-> There's no hosted instance; it's a run-it-yourself project. (Deploying? Set
-> `NEXT_PUBLIC_SITE_URL` and the URLs update automatically.)
+> Note: the previous embeddable `/<username>.png` card image and per-user
+> social OG images (`next/og`) are not part of the hosted Cloudflare build —
+> they require a WASM image renderer on Workers and are deferred. The
+> interactive card renders in the browser.
 
 <p align="center">
   <img src="https://img.shields.io/badge/Next.js-16-black" alt="Next.js" />
@@ -82,21 +79,35 @@ and the **tier** from the overall:
 > **Note on scores:** PAC, PAS, DEF and PHY lean on commits / PRs / reviews /
 > lifetime contributions, which only the GitHub **GraphQL** API returns (a token
 > is required). Without a token the app still scores every profile from public
-> REST data — just with less depth (`rating.depth === "lite"`). Set
-> `GITHUB_TOKEN` to get the full, accurate rating.
+> REST data — just with less depth (`rating.depth === "lite"`).
+
+### GitHub token — bring your own
+
+On the hosted app, a token is **per-user**: click **Add GitHub token** on a
+result to store your own token in your browser (sent as an `x-github-token`
+header). It unlocks the accurate GraphQL score and your own 5k req/hr limit —
+we never use a shared token. A classic token with **no scopes** is enough
+(public data only). Without a token the app runs in anonymous **lite** mode
+(GitHub's 60 req/hr shared REST tier); if that limit is hit you're prompted to
+add a token.
+
+A server-side `GITHUB_TOKEN` / `GITHUB_TOKENS` env var is still supported for
+self-hosting, but the hosted deployment sets none.
 
 ---
 
 ## 🛠 Tech stack
 
-- **Framework:** Next.js 16 (App Router) · React 19
+- **Framework:** Next.js (App Router) · React 19
 - **Language:** TypeScript (strict)
 - **Styling:** Tailwind CSS 4
-- **Images:** `next/og` (Satori) — card PNG, story export, OG images
-- **Cache:** Redis (`ioredis`), best-effort read-through
-- **Data:** GitHub REST + GraphQL
+- **Data:** GitHub REST + GraphQL (via `fetch`)
 - **Tests:** Vitest
 - **Package manager:** pnpm
+
+> The Redis (`ioredis`) cache and `next/og` card/story/OG images from earlier
+> versions are disabled on the Cloudflare build (both need infra the Workers
+> runtime lacks); the app falls through to live fetches and browser rendering.
 
 ---
 
@@ -109,26 +120,22 @@ pnpm install
 # dev
 pnpm dev            # http://localhost:3000
 
-# production
-pnpm build && pnpm start
-
 # tests
 pnpm test
 ```
 
-### Environment variables
-
-All optional — copy `.env.example` to `.env` and fill what you need.
+### Environment variables (self-hosting, all optional)
 
 | Variable | Purpose |
 |----------|---------|
-| `GITHUB_TOKEN` | Single token — unlocks GraphQL contribution data and the accurate score (5k req/hr). |
-| `GITHUB_TOKENS` | Comma-separated token **pool** — sharded per-login with failover for higher throughput. |
-| `REDIS_URL` | Enables the read-through profile cache. Omit to run without caching. |
-| `NEXT_PUBLIC_SITE_URL` | Canonical site origin for metadata, OG images and the sitemap. |
+| `GITHUB_TOKEN` / `GITHUB_TOKENS` | Server-side token(s) — unlock the accurate GraphQL score and higher throughput. The hosted app sets none (tokens are per-user). |
+| `NEXT_PUBLIC_SITE_URL` | Canonical site origin for metadata and the sitemap. |
 
-Without any of these the app runs in anonymous **lite** mode (GitHub's 60 req/hr
-REST tier, no cache).
+## Deployment
+
+Deployed on **Cloudflare Pages**: static export (`npx next build` → `out`) plus a
+Pages Function at `functions/api/card/[username].ts`. Live at
+`gitfootscore.sudarshantechlabs.com`.
 
 ---
 
