@@ -15,9 +15,7 @@ export function CardActions({ login, overall, tier }: { login: string; overall: 
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setOrigin(window.location.origin), []);
 
-  const pageUrl = `${origin}/u/${login}`;
-  const imgUrl = `${origin}/${login}.png`;
-  const embed = `[![${login} on GitFootScore](${imgUrl})](${pageUrl})`;
+  const pageUrl = `${origin}/u?username=${login}`;
   const tweet = `My GitHub is a ${overall}-rated ${tier} on GitFootScore ⚽`;
 
   async function copy(text: string, key: string) {
@@ -36,12 +34,6 @@ export function CardActions({ login, overall, tier }: { login: string; overall: 
   return (
     <div className="flex w-full max-w-md flex-col gap-3">
       <div className="flex flex-wrap justify-center gap-2">
-        <a href={`/${login}.png`} download={`${login}-gitfootscore.png`} className={btn}>
-          ↓ Card PNG
-        </a>
-        <a href={`/api/story/${login}`} download={`${login}-gitfootscore-story.png`} className={btn}>
-          ↓ Story
-        </a>
         <button onClick={() => copy(pageUrl, "link")} className={btn}>
           {copied === "link" ? "Copied!" : "Copy link"}
         </button>
@@ -53,23 +45,6 @@ export function CardActions({ login, overall, tier }: { login: string; overall: 
         >
           Share on X
         </a>
-      </div>
-
-      <div className="rounded-xl border border-border bg-surface/60 p-3">
-        <div className="mb-1.5 flex items-center justify-between">
-          <span className="text-[11px] font-bold uppercase tracking-widest text-muted">
-            Embed in your README
-          </span>
-          <button
-            onClick={() => copy(embed, "embed")}
-            className="text-[12px] font-semibold text-mint hover:brightness-110"
-          >
-            {copied === "embed" ? "Copied!" : "Copy"}
-          </button>
-        </div>
-        <code className="block overflow-x-auto whitespace-nowrap text-[11.5px] text-ink-soft">
-          {embed}
-        </code>
       </div>
     </div>
   );

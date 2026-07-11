@@ -68,7 +68,7 @@ export default function Home() {
             {EXAMPLES.map((u, i) => (
               <span key={u}>
                 {i > 0 && " · "}
-                <Link href={`/u/${u}`} className="text-ink-soft underline-offset-2 hover:underline">
+                <Link href={`/u?username=${u}`} className="text-ink-soft underline-offset-2 hover:underline">
                   {u}
                 </Link>
               </span>

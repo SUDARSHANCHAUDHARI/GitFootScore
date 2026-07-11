@@ -1,31 +1,11 @@
-import "server-only";
-import Redis from "ioredis";
-
-// Best-effort Redis singleton. If REDIS_URL is unset (or the connection fails)
-// `redis` is null and every caller falls through to a live path — the cache only
-// ever changes speed, never behaviour. A single client is reused across requests
-// via globalThis so dev hot-reloads don't leak connections.
-
-declare global {
-  var __gfsRedis: Redis | null | undefined;
+// Redis cache disabled on the Cloudflare Workers runtime (ioredis needs Node TCP
+// sockets, which Workers lack). Every caller already treats `redis === null` as
+// "no cache" and falls through to a live fetch — behavior is unchanged, only
+// speed. If a distributed cache is wanted later, back this with Cloudflare KV.
+type RedisLike = {
+  get(key: string): Promise<string | null>
+  set(key: string, value: string, mode: string, ttl: number): Promise<unknown>
+  incr(key: string): Promise<number>
 }
 
-function create(): Redis | null {
-  const url = process.env.REDIS_URL;
-  if (!url) return null;
-  try {
-    const client = new Redis(url, {
-      maxRetriesPerRequest: 1,
-      lazyConnect: false,
-      enableOfflineQueue: false,
-    });
-    client.on("error", (e) => console.error("[redis]", (e as Error).message));
-    return client;
-  } catch (e) {
-    console.error("[redis] init failed:", (e as Error).message);
-    return null;
-  }
-}
-
-export const redis: Redis | null =
-  globalThis.__gfsRedis !== undefined ? globalThis.__gfsRedis : (globalThis.__gfsRedis = create());
+export const redis: RedisLike | null = null
