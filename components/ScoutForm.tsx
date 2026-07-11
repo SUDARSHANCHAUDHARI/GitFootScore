@@ -13,7 +13,7 @@ export function ScoutForm({ autoFocus = false }: { autoFocus?: boolean }) {
     const login = value.trim().replace(/^@/, "");
     if (!login) return;
     setBusy(true);
-    router.push(`/u/${encodeURIComponent(login)}`);
+    router.push(`/u?username=${encodeURIComponent(login)}`);
   }
 
   return (

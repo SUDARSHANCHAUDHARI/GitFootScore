@@ -18,7 +18,7 @@ export function CardFan() {
         return (
           <Link
             key={profile.login}
-            href={`/u/${profile.login}`}
+            href={`/u?username=${profile.login}`}
             className="group absolute left-1/2 top-0 w-[180px] transition-transform duration-300 hover:z-10 hover:-translate-y-2"
             style={{
               transform: `translateX(-50%) translateX(${l.x}px) translateY(${l.y}px) rotate(${l.rotate}deg)`,

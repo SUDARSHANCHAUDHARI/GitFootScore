@@ -1,4 +1,3 @@
-import "server-only";
 import { redis } from "./redis";
 
 // Best-effort scout counter. No-ops without Redis; never throws into a scout.

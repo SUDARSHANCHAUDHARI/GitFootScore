@@ -1,4 +1,3 @@
-import "server-only";
 
 // GitHub token pool. Reads GITHUB_TOKENS (comma-separated) and/or GITHUB_TOKEN
 // into one list, then shards each scout onto a deterministic token by hashing

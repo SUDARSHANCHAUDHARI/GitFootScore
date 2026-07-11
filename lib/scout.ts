@@ -1,4 +1,3 @@
-import "server-only";
 import { redis } from "./redis";
 import { recordScout } from "./analytics";
 import { fetchProfile, type Profile } from "./github";
